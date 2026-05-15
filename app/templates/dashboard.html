@@ -4,42 +4,30 @@
 
 <div class="container-fluid">
 
-<!-- HEADER + FILTERS -->
+<!-- HEADER -->
 <div class="card shadow-sm p-4 mb-4">
 
     <h2>🌍 Earthquake Analytics Dashboard</h2>
-    <p class="text-muted">Monitoring global seismic activity in real time</p>
+    <p class="text-muted">Real-time seismic monitoring system (server-rendered analytics)</p>
 
     <form method="GET" class="row g-2 mt-2">
 
         <!-- SEARCH -->
-        <div class="col-md-6">
+        <div class="col-md-8">
             <input class="form-control"
                    type="text"
                    name="search"
-                   placeholder="Search location (e.g. Japan, Accra...)"
+                   placeholder="Search earthquake location..."
                    value="{{ request.args.get('search', '') }}">
         </div>
 
-        <!-- REGION FILTER -->
-        <div class="col-md-3">
-            <select class="form-control" name="region">
-                <option value="">All Regions</option>
-                {% for r in regions %}
-                    <option value="{{ r.id }}"
-                        {% if request.args.get('region')|int == r.id %}selected{% endif %}>
-                        {{ r.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- BUTTON -->
-        <div class="col-md-3">
-            <button class="btn btn-primary w-100">Filter</button>
+        <!-- FILTER BUTTON -->
+        <div class="col-md-4">
+            <button class="btn btn-primary w-100">Search</button>
         </div>
 
     </form>
+
 </div>
 
 
@@ -62,7 +50,7 @@
 
     <div class="col-md-3">
         <div class="card p-3 text-center shadow-sm">
-            <h6>Avg Depth</h6>
+            <h6>Average Depth</h6>
             <h3>{{ avg_depth }} km</h3>
         </div>
     </div>
@@ -77,33 +65,27 @@
 </div>
 
 
-<!-- CHART + STRONGEST -->
 <div class="row">
 
-    <!-- CHART -->
-    <div class="col-md-6">
-        <div class="card p-3 shadow-sm">
-            <h5>📊 Earthquakes by Region</h5>
-            <canvas id="regionChart"></canvas>
-        </div>
-    </div>
+<!-- STRONGEST EARTHQUAKES -->
+<div class="col-md-6">
 
-    <!-- STRONGEST EARTHQUAKES -->
-    <div class="col-md-6">
-        <div class="card p-3 shadow-sm">
-            <h5>⚠️ Strongest Earthquakes</h5>
+    <div class="card shadow-sm p-3">
 
-            <table class="table table-sm table-hover">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Magnitude</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
+        <h5>⚠️ Strongest Earthquakes</h5>
 
-                <tbody>
-                {% for quake in strongest %}
+        <table class="table table-sm table-hover">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Magnitude</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for quake in strongest %}
                 <tr>
                     <td>
                         <a href="/earthquake/{{ quake.id }}">
@@ -117,12 +99,50 @@
                     </td>
                     <td>{{ quake.place }}</td>
                 </tr>
-                {% endfor %}
-                </tbody>
+            {% endfor %}
+            </tbody>
 
-            </table>
-        </div>
+        </table>
+
     </div>
+
+</div>
+
+
+<!-- REGIONAL STATISTICS (TABLE INSTEAD OF CHART) -->
+<div class="col-md-6">
+
+    <div class="card shadow-sm p-3">
+
+        <h5>🌍 Regional Statistics</h5>
+
+        <table class="table table-striped table-sm">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Region</th>
+                    <th>Total Earthquakes</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for s in stats %}
+                <tr>
+                    <td>{{ s[0] }}</td>
+                    <td>
+                        <span class="badge bg-primary">
+                            {{ s[1] }}
+                        </span>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
 
 </div>
 
@@ -134,7 +154,7 @@
 
     <div class="table-responsive">
 
-        <table class="table table-striped table-hover">
+        <table class="table table-hover table-striped">
 
             <thead class="table-dark">
                 <tr>
@@ -156,7 +176,13 @@
                             {{ quake.quake_id }}
                         </a>
                     </td>
-                    <td>{{ quake.magnitude }}</td>
+
+                    <td>
+                        <span class="badge bg-warning text-dark">
+                            {{ quake.magnitude }}
+                        </span>
+                    </td>
+
                     <td>{{ quake.depth }} km</td>
                     <td>{{ quake.place }}</td>
                     <td>
@@ -181,23 +207,5 @@
 </div>
 
 </div>
-
-
-<!-- CHART SCRIPT -->
-<script>
-const ctx = document.getElementById('regionChart');
-
-new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-        labels: [{% for s in stats %}'{{ s[0] }}',{% endfor %}],
-        datasets: [{
-            label: 'Earthquakes',
-            data: [{% for s in stats %}{{ s[1] }},{% endfor %}],
-            borderWidth: 1
-        }]
-    }
-});
-</script>
 
 {% endblock %}
