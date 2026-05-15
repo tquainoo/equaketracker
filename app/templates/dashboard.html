@@ -1,157 +1,96 @@
-{% extends "base.html" %}
-
-{% block title %}Earthquake Analytics Dashboard{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
 
-<style>
-/* --- Graphic Bars Without JS --- */
-.bar {
-    height: 14px;
-    background: #4a90e2;
-    display: inline-block;
-}
-.bar-red {
-    background: #d9534f;
-}
-.bar-orange {
-    background: #f0ad4e;
-}
-.bar-green {
-    background: #5cb85c;
-}
-.metric-box {
-    padding: 1rem;
-    border-radius: 6px;
-    background: #f7f7f7;
-    margin-bottom: 1rem;
-}
-.table-heatmap td {
-    padding: 6px;
-}
-.table-heatmap tr:nth-child(even) {
-    background: #f0f0f0;
-}
-</style>
+<div class="row">
 
-<h1>Earthquake Analytics Dashboard</h1>
+<div class="col-md-12 mb-4">
+<div class="card p-4">
 
-<p class="lead">
-A visual overview of global earthquake activity using real USGS data.
-</p>
+<h2>Earthquake Analytics Dashboard</h2>
 
-<hr>
+<form method="GET"> 
+    <input class="form-control" type="text" name="search" placeholder="Search earthquake location">
+</form>
 
-<!-- =============================== -->
-<!-- 1. STRONGEST EARTHQUAKES        -->
-<!-- =============================== -->
-<h2>Top 10 Strongest Earthquakes</h2>
-
-<table class="table table-heatmap">
-    <tr>
-        <th>ID</th>
-        <th>Magnitude</th>
-        <th>Visual</th>
-        <th>Location</th>
-    </tr>
-
-    {% for q in top10 %}
-    <tr>
-        <td><a href="{{ url_for('earthquake_detail', eq_id=q['id']) }}">{{ q['usgs_id'] }}</a></td>
-        <td>{{ q['magnitude'] }}</td>
-        <td>
-            <div class="bar bar-red" style="width: {{ q['magnitude'] * 20 }}px;"></div>
-        </td>
-        <td>{{ q['place'] }}</td>
-    </tr>
-    {% endfor %}
-</table>
-
-<hr>
-
-<!-- =============================== -->
-<!-- 2. AVERAGE MAGNITUDE BY REGION  -->
-<!-- =============================== -->
-<h2>Average Magnitude by Region</h2>
-
-<table class="table table-heatmap">
-    <tr>
-        <th>Region</th>
-        <th>Avg Magnitude</th>
-        <th>Visual</th>
-        <th>Count</th>
-    </tr>
-
-    {% for row in avg_mag %}
-    <tr>
-        <td>{{ row['region'] }}</td>
-        <td>{{ "%.2f"|format(row['avg_mag']) }}</td>
-        <td>
-            <div class="bar bar-orange" style="width: {{ row['avg_mag'] * 25 }}px;"></div>
-        </td>
-        <td>{{ row['count'] }}</td>
-    </tr>
-    {% endfor %}
-</table>
-
-<hr>
-
-<!-- =============================== -->
-<!-- 3. DEPTH DISTRIBUTION           -->
-<!-- =============================== -->
-<h2>Depth Distribution</h2>
-
-<div class="metric-box">
-    <strong>Shallow (&lt; 70 km):</strong>
-    {{ depth_dist['shallow'] }}
-    <div class="bar bar-green" style="width: {{ depth_dist['shallow'] * 0.5 }}px;"></div>
+</div>
 </div>
 
-<div class="metric-box">
-    <strong>Intermediate (70–300 km):</strong>
-    {{ depth_dist['intermediate'] }}
-    <div class="bar bar-orange" style="width: {{ depth_dist['intermediate'] * 0.5 }}px;"></div>
-</div>
+<div class="col-md-6">
+<div class="card p-3 mb-4">
+<h4>Strongest Earthquakes</h4>
 
-<div class="metric-box">
-    <strong>Deep (&gt; 300 km):</strong>
-    {{ depth_dist['deep'] }}
-    <div class="bar bar-red" style="width: {{ depth_dist['deep'] * 0.5 }}px;"></div>
-</div>
+<table class="table">
+<tr>
+<th>ID</th>
+<th>Magnitude</th>
+<th>Location</th>
+</tr>
 
-<hr>
-
-<!-- =============================== -->
-<!-- 4. REGION RANKING               -->
-<!-- =============================== -->
-<h2>Regions Ranked by Earthquake Count</h2>
-
-<table class="table table-heatmap">
-    <tr>
-        <th>Region</th>
-        <th>Count</th>
-        <th>Visual</th>
-    </tr>
-
-    {% for row in ranking %}
-    <tr>
-        <td>
-            <a href="{{ url_for('region_detail', region_id=row['id']) }}">
-                {{ row['name'] }}
-            </a>
-        </td>
-        <td>{{ row['quake_count'] }}</td>
-        <td>
-            <div class="bar" style="width: {{ row['quake_count'] * 2 }}px;"></div>
-        </td>
-    </tr>
-    {% endfor %}
+{% for quake in strongest %}
+<tr>
+<td><a href="/earthquake/{{ quake.id }}">{{ quake.quake_id }}</a></td>
+<td>{{ quake.magnitude }}</td>
+<td>{{ quake.place }}</td>
+</tr>
+{% endfor %}
 </table>
 
-<hr>
+</div>
+</div>
 
-<p>
-    <a href="{{ url_for('index') }}">Back to Earthquake List</a>
-</p>
+<div class="col-md-6">
+<div class="card p-3 mb-4">
+<h4>Regional Statistics</h4>
+
+<canvas id="regionChart"></canvas>
+
+<script>
+const ctx = document.getElementById('regionChart');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [{% for s in stats %}'{{ s[0] }}',{% endfor %}],
+        datasets: [{
+            label: 'Earthquakes',
+            data: [{% for s in stats %}{{ s[1] }},{% endfor %}]
+        }]
+    }
+});
+</script>
+
+</div>
+</div>
+
+<div class="col-md-12">
+<div class="card p-3">
+<h4>Recent Earthquakes</h4>
+
+<table class="table table-striped">
+<tr>
+<th>ID</th>
+<th>Magnitude</th>
+<th>Depth</th>
+<th>Location</th>
+<th>Region</th>
+</tr>
+
+{% for quake in earthquakes %}
+<tr>
+<td><a href="/earthquake/{{ quake.id }}">{{ quake.quake_id }}</a></td>
+<td>{{ quake.magnitude }}</td>
+<td>{{ quake.depth }}</td>
+<td>{{ quake.place }}</td>
+<td>{{ quake.region.name }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</div>
+</div>
+
+</div>
 
 {% endblock %}
