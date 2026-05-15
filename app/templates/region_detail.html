@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="card p-4">
+
+<h2>{{ region.name }}</h2>
+
+<p>Country: {{ region.country.name }}</p>
+
+<p>Total Earthquakes: {{ region.earthquakes|length }}</p>
+
+</div>
+
+{% endblock %}

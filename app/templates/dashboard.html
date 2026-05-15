@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row">
+
+<div class="col-md-12 mb-4">
+<div class="card p-4">
+
+<h2>Earthquake Analytics Dashboard</h2>
+
+<form method="GET">
+    <input class="form-control" type="text" name="search" placeholder="Search earthquake location">
+</form>
+
+</div>
+</div>
+
+<div class="col-md-6">
+<div class="card p-3 mb-4">
+<h4>Strongest Earthquakes</h4>
+
+<table class="table">
+<tr>
+<th>ID</th>
+<th>Magnitude</th>
+<th>Location</th>
+</tr>
+
+{% for quake in strongest %}
+<tr>
+<td><a href="/earthquake/{{ quake.id }}">{{ quake.quake_id }}</a></td>
+<td>{{ quake.magnitude }}</td>
+<td>{{ quake.place }}</td>
+</tr>
+{% endfor %}
+</table>
+
+</div>
+</div>
+
+<div class="col-md-6">
+<div class="card p-3 mb-4">
+<h4>Regional Statistics</h4>
+
+<canvas id="regionChart"></canvas>
+
+<script>
+const ctx = document.getElementById('regionChart');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [{% for s in stats %}'{{ s[0] }}',{% endfor %}],
+        datasets: [{
+            label: 'Earthquakes',
+            data: [{% for s in stats %}{{ s[1] }},{% endfor %}]
+        }]
+    }
+});
+</script>
+
+</div>
+</div>
+
+<div class="col-md-12">
+<div class="card p-3">
+<h4>Recent Earthquakes</h4>
+
+<table class="table table-striped">
+<tr>
+<th>ID</th>
+<th>Magnitude</th>
+<th>Depth</th>
+<th>Location</th>
+<th>Region</th>
+</tr>
+
+{% for quake in earthquakes %}
+<tr>
+<td><a href="/earthquake/{{ quake.id }}">{{ quake.quake_id }}</a></td>
+<td>{{ quake.magnitude }}</td>
+<td>{{ quake.depth }}</td>
+<td>{{ quake.place }}</td>
+<td>{{ quake.region.name }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</div>
+</div>
+
+</div>
+
+{% endblock %}
