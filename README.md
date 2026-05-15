@@ -75,6 +75,6 @@ Built using **Jinja2 templating engine + Bootstrap UI**
 
 ---
 
-# 🔧 System Implementation
+# System Implementation
 
 
