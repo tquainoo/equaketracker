@@ -9,8 +9,9 @@ def create_app():
 
     app.config['SECRET_KEY'] = 'earthquake-secret'
 
-    # PostgreSQL (Render)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("postgresql://earthquake_db_rhjn_user:1BCTa1hw4T5M0pqIZerbQDXUQsLwhAOf@dpg-d83klujeo5us73bcp9b0-a.ohio-postgres.render.com/earthquake_db_rhjn")
+    database_url = "postgresql://earthquake_db_rhjn_user:1BCTa1hw4T5M0pqIZerbQDXUQsLwhAOf@dpg-d83klujeo5us73bcp9b0-a.ohio-postgres.render.com/earthquake_db_rhjn"
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
