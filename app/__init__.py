@@ -8,8 +8,8 @@ def create_app():
     app = Flask(__name__)
 
     app.config['SECRET_KEY'] = 'earthquake-secret'
-
-    database_url = "postgresql://earthquake_db_rhjn_user:1BCTa1hw4T5M0pqIZerbQDXUQsLwhAOf@dpg-d83klujeo5us73bcp9b0-a.ohio-postgres.render.com/earthquake_db_rhjn"
+    
+    database_url = "postgresql://earthquake_db_rhjn_user:1BCTa1hw4T5M0pqIZerbQDXUQsLwhAOf@dpg-d83klujeo5us73bcp9b0-a.ohio-postgres.render.com:5432/earthquake_db_rhjn"
 
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 
