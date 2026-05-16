@@ -8,32 +8,28 @@ from . import db
 main = Blueprint('main', __name__)
 
 
+# ----------------------------------------------------
+# DASHBOARD / HOME
+# ----------------------------------------------------
 @main.route('/')
 def index():
 
-    # -------------------------
-    # QUERY PARAMETERS
-    # -------------------------
     search = request.args.get('search', '')
     region_id = request.args.get('region', '')
     page = request.args.get('page', 1, type=int)
 
-    PER_PAGE = 20  # enterprise pagination size
+    PER_PAGE = 20
 
     query = Earthquake.query
 
-    # -------------------------
-    # FILTERS
-    # -------------------------
+    # Filters
     if search:
         query = query.filter(Earthquake.place.ilike(f"%{search}%"))
 
     if region_id:
         query = query.filter(Earthquake.region_id == region_id)
 
-    # -------------------------
-    # PAGINATION (IMPORTANT)
-    # -------------------------
+    # Pagination
     pagination = query.order_by(Earthquake.id.desc()).paginate(
         page=page,
         per_page=PER_PAGE,
@@ -42,14 +38,11 @@ def index():
 
     earthquakes = pagination.items
 
-    # -------------------------
-    # ANALYTICS
-    # -------------------------
+    # Analytics
     stats = region_statistics()
     strongest = strongest_earthquakes()
 
     total_count = Earthquake.query.count()
-
     max_magnitude = db.session.query(func.max(Earthquake.magnitude)).scalar()
     avg_depth = db.session.query(func.avg(Earthquake.depth)).scalar()
     region_count = Region.query.count()
@@ -69,4 +62,39 @@ def index():
         regions=regions,
         search=search,
         region_id=region_id
+    )
+
+
+# ----------------------------------------------------
+# EARTHQUAKE DETAIL PAGE
+# ----------------------------------------------------
+@main.route('/earthquake/<int:quake_id>')
+def earthquake_detail(quake_id):
+
+    earthquake = Earthquake.query.get_or_404(quake_id)
+
+    # Related earthquakes in same region
+    related = Earthquake.query.filter(
+        Earthquake.region_id == earthquake.region_id,
+        Earthquake.id != earthquake.id
+    ).limit(10).all()
+
+    return render_template(
+        'earthquake_detail.html',
+        earthquake=earthquake,
+        related=related
+    )
+
+
+# ----------------------------------------------------
+# REGION DETAIL PAGE
+# ----------------------------------------------------
+@main.route('/region/<int:region_id>')
+def region_detail(region_id):
+
+    region = Region.query.get_or_404(region_id)
+
+    return render_template(
+        'region_detail.html',
+        region=region
     )
