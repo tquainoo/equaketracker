@@ -2,202 +2,328 @@
 
 {% block content %}
 
-<div class="container-fluid">
+<div class="container-fluid py-4">
 
-<!-- HEADER -->
-<div class="card p-4 shadow-sm mb-4">
+    <!-- HEADER -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
 
-    <h2>🌍 Earthquake Analytics Dashboard</h2>
-    <p class="text-muted">Enterprise monitoring system (server-rendered, no JavaScript)</p>
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        🌍 Earthquake Analytics Dashboard
+                    </h2>
 
-    <form method="GET" class="row g-2 mt-2">
+                    <p class="text-muted mb-0">
+                        Enterprise earthquake monitoring system powered by Flask
+                    </p>
+                </div>
+            </div>
 
-        <div class="col-md-6">
-            <input class="form-control"
-                   name="search"
-                   placeholder="Search location..."
-                   value="{{ search }}">
+            <!-- FILTER FORM -->
+            <form method="GET" class="row g-3 mt-3">
+
+                <div class="col-md-6">
+                    <input type="text"
+                           name="search"
+                           class="form-control"
+                           placeholder="Search by location..."
+                           value="{{ search }}">
+                </div>
+
+                <div class="col-md-3">
+                    <select name="region" class="form-select">
+
+                        <option value="">All Regions</option>
+
+                        {% for r in regions %}
+                            <option value="{{ r.id }}"
+                                {% if region_id|int == r.id %}selected{% endif %}>
+                                {{ r.name }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Filter Records
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- KPI CARDS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Total Records</h6>
+                    <h2 class="fw-bold">{{ total_count }}</h2>
+                </div>
+            </div>
         </div>
 
         <div class="col-md-3">
-            <select name="region" class="form-control">
-                <option value="">All Regions</option>
-                {% for r in regions %}
-                    <option value="{{ r.id }}"
-                        {% if region_id|int == r.id %}selected{% endif %}>
-                        {{ r.name }}
-                    </option>
-                {% endfor %}
-            </select>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Max Magnitude</h6>
+                    <h2 class="fw-bold text-danger">{{ max_magnitude }}</h2>
+                </div>
+            </div>
         </div>
 
         <div class="col-md-3">
-            <button class="btn btn-primary w-100">Filter</button>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Average Depth</h6>
+                    <h2 class="fw-bold">{{ avg_depth }} km</h2>
+                </div>
+            </div>
         </div>
 
-    </form>
-
-</div>
-
-
-<!-- KPI CARDS -->
-<div class="row mb-4">
-
-    <div class="col-md-3">
-        <div class="card p-3 text-center shadow-sm">
-            <h6>Total Records</h6>
-            <h3>{{ total_count }}</h3>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Regions</h6>
+                    <h2 class="fw-bold">{{ region_count }}</h2>
+                </div>
+            </div>
         </div>
+
     </div>
 
-    <div class="col-md-3">
-        <div class="card p-3 text-center shadow-sm">
-            <h6>Max Magnitude</h6>
-            <h3>{{ max_magnitude }}</h3>
+
+    <!-- SUMMARY TABLES -->
+    <div class="row g-4">
+
+        <!-- STRONGEST EARTHQUAKES -->
+        <div class="col-lg-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-3">
+                        ⚠️ Strongest Earthquakes
+                    </h5>
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Magnitude</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for quake in strongest %}
+                                <tr>
+                                    <td>{{ quake.quake_id }}</td>
+
+                                    <td>
+                                        <span class="badge bg-danger fs-6">
+                                            {{ quake.magnitude }}
+                                        </span>
+                                    </td>
+
+                                    <td>{{ quake.place }}</td>
+                                </tr>
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="card p-3 text-center shadow-sm">
-            <h6>Avg Depth</h6>
-            <h3>{{ avg_depth }} km</h3>
+
+        <!-- REGIONAL SUMMARY -->
+        <div class="col-lg-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-3">
+                        🌍 Regional Summary
+                    </h5>
+
+                    <div class="table-responsive">
+
+                        <table class="table table-striped align-middle">
+
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Region</th>
+                                    <th>Total Records</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for s in stats %}
+                                <tr>
+                                    <td>{{ s[0] }}</td>
+
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            {{ s[1] }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-3">
-        <div class="card p-3 text-center shadow-sm">
-            <h6>Regions</h6>
-            <h3>{{ region_count }}</h3>
+
+    <!-- EARTHQUAKE RECORDS -->
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">
+                📍 Earthquake Records
+            </h5>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover table-striped align-middle">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Magnitude</th>
+                            <th>Depth</th>
+                            <th>Location</th>
+                            <th>Region</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for quake in earthquakes %}
+                        <tr>
+
+                            <td>{{ quake.quake_id }}</td>
+
+                            <td>
+                                <span class="badge bg-warning text-dark">
+                                    {{ quake.magnitude }}
+                                </span>
+                            </td>
+
+                            <td>{{ quake.depth }} km</td>
+
+                            <td>{{ quake.place }}</td>
+
+                            <td>
+                                {{ quake.region.name if quake.region else 'N/A' }}
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
         </div>
-    </div>
-
-</div>
-
-
-<div class="row">
-
-<!-- STRONGEST -->
-<div class="col-md-6">
-    <div class="card p-3 shadow-sm">
-
-        <h5>⚠️ Strongest Earthquakes</h5>
-
-        <table class="table table-sm table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Magnitude</th>
-                    <th>Location</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            {% for quake in strongest %}
-                <tr>
-                    <td>{{ quake.quake_id }}</td>
-                    <td><span class="badge bg-danger">{{ quake.magnitude }}</span></td>
-                    <td>{{ quake.place }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-    </div>
-</div>
-
-
-<!-- REGIONS -->
-<div class="col-md-6">
-    <div class="card p-3 shadow-sm">
-
-        <h5>🌍 Regional Summary</h5>
-
-        <table class="table table-sm table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>Region</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            {% for s in stats %}
-                <tr>
-                    <td>{{ s[0] }}</td>
-                    <td><span class="badge bg-primary">{{ s[1] }}</span></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-    </div>
-</div>
-
-</div>
-
-
-<!-- EARTHQUAKES TABLE -->
-<div class="card p-3 shadow-sm mt-4">
-
-    <h5>📍 Earthquake Records</h5>
-
-    <div class="table-responsive">
-
-        <table class="table table-hover table-striped">
-
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Magnitude</th>
-                    <th>Depth</th>
-                    <th>Location</th>
-                    <th>Region</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-            {% for quake in earthquakes %}
-                <tr>
-                    <td>{{ quake.quake_id }}</td>
-                    <td>{{ quake.magnitude }}</td>
-                    <td>{{ quake.depth }} km</td>
-                    <td>{{ quake.place }}</td>
-                    <td>{{ quake.region.name if quake.region else 'N/A' }}</td>
-                </tr>
-            {% endfor %}
-
-            </tbody>
-
-        </table>
 
     </div>
 
-</div>
+
+    <!-- PAGINATION -->
+    <div class="d-flex justify-content-center align-items-center mt-4 gap-3 flex-wrap">
+
+        {% if pagination.has_prev %}
+            <a class="btn btn-outline-primary"
+               href="?page={{ pagination.prev_num }}&search={{ search }}&region={{ region_id }}">
+                ← Previous
+            </a>
+        {% endif %}
+
+        <span class="fw-semibold">
+            Page {{ pagination.page }} of {{ pagination.pages }}
+        </span>
+
+        {% if pagination.has_next %}
+            <a class="btn btn-outline-primary"
+               href="?page={{ pagination.next_num }}&search={{ search }}&region={{ region_id }}">
+                Next →
+            </a>
+        {% endif %}
+
+    </div>
 
 
-<!-- PAGINATION -->
-<div class="mt-4 text-center">
+    <!-- FOOTER -->
+    <footer class="mt-5 py-4 border-top text-center text-muted">
 
-    {% if pagination.has_prev %}
-        <a class="btn btn-outline-primary"
-           href="?page={{ pagination.prev_num }}&search={{ search }}&region={{ region_id }}">
-            ← Previous
-        </a>
-    {% endif %}
+        <div class="container">
 
-    <span class="mx-3">
-        Page {{ pagination.page }} of {{ pagination.pages }}
-    </span>
+            <p class="mb-1">
+                © 2026 Earthquake Analytics Dashboard
+            </p>
 
-    {% if pagination.has_next %}
-        <a class="btn btn-outline-primary"
-           href="?page={{ pagination.next_num }}&search={{ search }}&region={{ region_id }}">
-            Next →
-        </a>
-    {% endif %}
+            <p class="mb-1">
+                Developed by
+                <strong>Theodulph Quainoo MSc.IT</strong>
+                — University of Aberdeen
+            </p>
 
-</div>
+            <p class="mb-0">
+
+                <a href="https://github.com/tquainoo/equaketracker"
+                   target="_blank"
+                   class="text-decoration-none">
+                    GitHub Repository
+                </a>
+
+                |
+
+                <a href="https://tsquainoo.github.io/"
+                   target="_blank"
+                   class="text-decoration-none">
+                    Personal Portfolio
+                </a>
+
+            </p>
+
+        </div>
+
+    </footer>
 
 </div>
 
