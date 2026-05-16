@@ -131,8 +131,8 @@
                                 {% for quake in strongest %}
                                 <tr>
                                     <td>
-    <a href="/earthquake/{{ quake.quake_id }}" class="text-decoration-none fw-semibold">
-        {{ quake.quake_id }}
+    <a href="{{ url_for('main.earthquake_detail', id=quake.id) }}" class="text-decoration-none fw-semibold">
+        {{ quake.id }}
     </a>
 </td>
 
@@ -245,7 +245,7 @@
                         <tr>
 
                             <td>
-    <a href="/earthquake/{{ quake.quake_id }}" class="text-decoration-none fw-semibold">
+    <a href="{{ url_for('main.earthquake_detail', id=quake.id) }}" class="text-decoration-none fw-semibold">
         {{ quake.quake_id }}
     </a>
 </td>
@@ -263,7 +263,7 @@
 
                            <td>
     {% if quake.region %}
-        <a href="/region/{{ quake.region.id }}" class="text-decoration-none">
+        <a href="{{ url_for('main.region_detail', region_id=quake.region.id) }}" class="text-decoration-none">
             {{ quake.region.name }}
         </a>
     {% else %}

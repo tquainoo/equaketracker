@@ -68,12 +68,10 @@ def index():
 # ----------------------------------------------------
 # EARTHQUAKE DETAIL PAGE
 # ----------------------------------------------------
-@main.route('/earthquake/<int:quake_id>')
-def earthquake_detail(quake_id):
+@main.route('/earthquake/<int:id>')
+def earthquake_detail(id):
+    earthquake = Earthquake.query.get_or_404(id)
 
-    earthquake = Earthquake.query.get_or_404(quake_id)
-
-    # Related earthquakes in same region
     related = Earthquake.query.filter(
         Earthquake.region_id == earthquake.region_id,
         Earthquake.id != earthquake.id
@@ -84,6 +82,7 @@ def earthquake_detail(quake_id):
         earthquake=earthquake,
         related=related
     )
+
 
 
 # ----------------------------------------------------
