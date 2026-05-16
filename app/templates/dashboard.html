@@ -155,7 +155,7 @@
         </div>
 
 
-        <!-- REGIONAL SUMMARY (UPDATED WITH LINKS) -->
+        <!-- REGIONAL SUMMARY -->
         <div class="col-lg-6">
 
             <div class="card border-0 shadow-sm h-100">
@@ -181,20 +181,13 @@
 
                                 {% for s in stats %}
                                 <tr>
-
-                                    <td>
-                                        <a href="{{ url_for('main.region_detail', region_id=s[2]) }}"
-                                           class="text-decoration-none fw-semibold text-primary">
-                                            {{ s[0] }}
-                                        </a>
-                                    </td>
+                                    <td>{{ s[0] }}</td>
 
                                     <td>
                                         <span class="badge bg-primary">
                                             {{ s[1] }}
                                         </span>
                                     </td>
-
                                 </tr>
                                 {% endfor %}
 
@@ -254,14 +247,7 @@
                             <td>{{ quake.place }}</td>
 
                             <td>
-                                {% if quake.region %}
-                                    <a href="{{ url_for('main.region_detail', region_id=quake.region.id) }}"
-                                       class="text-decoration-none">
-                                        {{ quake.region.name }}
-                                    </a>
-                                {% else %}
-                                    N/A
-                                {% endif %}
+                                {{ quake.region.name if quake.region else 'N/A' }}
                             </td>
 
                         </tr>
